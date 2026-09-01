@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python *)",
+      "Bash(awk '{print $9, \"\\(\"$5\"\\)\"}')"
+    ]
+  }
+}
