@@ -20,7 +20,16 @@ from priority_detector import detect_priority, get_priority_description
 # Suppress noisy logs
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
+API_KEY = "AIzaSyCgHXLUhpMhw0X2XMfoh6WYGey0Y1bFmWI"
 FIREBASE_URL = "https://lifefly-default-rtdb.firebaseio.com/missions.json"
+
+try:
+    auth_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={API_KEY}"
+    res = requests.post(auth_url, json={"returnSecureToken": True}, timeout=3)
+    AUTH_TOKEN = "?auth=" + res.json().get("idToken")
+    FIREBASE_URL += AUTH_TOKEN
+except:
+    pass
 
 RESET  = "\033[0m"
 CYAN   = "\033[1;96m"

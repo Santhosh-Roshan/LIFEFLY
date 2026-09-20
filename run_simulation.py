@@ -50,6 +50,14 @@ except ImportError:
     print("    Install it: pip install dronekit")
     sys.exit(1)
 
+API_KEY = "AIzaSyCgHXLUhpMhw0X2XMfoh6WYGey0Y1bFmWI"
+try:
+    auth_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={API_KEY}"
+    res = requests.post(auth_url, json={"returnSecureToken": True}, timeout=3)
+    AUTH_TOKEN = "?auth=" + res.json().get("idToken")
+except:
+    AUTH_TOKEN = ""
+
 # ═══════════════════════════════════════════════════════════════
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════
@@ -148,26 +156,28 @@ def haversine_km(lat1, lon1, lat2, lon2):
 # FIREBASE HELPERS
 # ═══════════════════════════════════════════════════════════════
 
+def get_auth_url(base_url):
+    return base_url + AUTH_TOKEN if "?" not in base_url else base_url + "&" + AUTH_TOKEN.replace("?auth=", "auth=")
+
 def firebase_get(url):
     try:
-        r = requests.get(url, timeout=10)
+        r = requests.get(get_auth_url(url), timeout=10)
         if r.status_code == 200:
             return r.json()
     except:
         pass
     return None
 
-
 def firebase_put(url, data):
     try:
-        requests.put(url, json=data, timeout=10)
+        requests.put(get_auth_url(url), json=data, timeout=10)
     except:
         pass
 
 
 def firebase_patch(url, data):
     try:
-        requests.patch(url, json=data, timeout=10)
+        requests.patch(get_auth_url(url), json=data, timeout=10)
     except:
         pass
 
@@ -181,7 +191,7 @@ def firebase_post(url, data):
 
 def firebase_delete(url):
     try:
-        requests.delete(url, timeout=10)
+        requests.delete(get_auth_url(url), timeout=10)
     except:
         pass
 
@@ -527,11 +537,21 @@ def main():
     """)
 
     # ── Step 1: Start SITL ──
-    print(f"{CYAN}[1/3] Starting MAVLink SITL Simulation Server...{RESET}")
-    sitl = dronekit_sitl.start_default()
+    print(f"\n{CYAN}[1/3] Starting copter simulator (SITL){RESET}")
+    sitl_args = ['--model', 'quad', '--home=17.3850,78.4867,0,0', '--out=127.0.0.1:14550']
+    sitl = dronekit_sitl.SITL()
+    sitl.download('copter', '3.3', verbose=True)
+    try:
+        sitl.launch(sitl_args, await_ready=True)
+        sitl.block_until_ready(verbose=True)
+    except Exception as e:
+        print(f"\n{RED}[!] SITL Launch Failed: {e}{RESET}")
+        print(f"    {YELLOW}Action: Make sure all old 'arducopter.exe' instances are killed.{RESET}")
+        sys.exit(1)
+        
     connection_string = sitl.connection_string()
     print(f"  {GREEN}✓ SITL started at: {WHITE}{connection_string}{RESET}")
-    print(f"  {DIM}Connect Mission Planner / MAVProxy to this address to view the flight{RESET}")
+    print(f"  {DIM}Mission Planner: Connect to UDP port 14550 to view the live simulation{RESET}")
 
     # ── Step 2: Connect to vehicle ──
     print(f"\n{CYAN}[2/3] Connecting to simulated vehicle via MAVLink...{RESET}")
