@@ -5,75 +5,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeFly GCS - Priority UAV Medical Delivery Network</title>
-    <meta name="description"
-        content="LifeFly Ground Control Station — Priority-based intra-hospital UAV drone medical delivery network with real-time Firebase IoT, satellite tracking, and financial analytics.">
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
-        body,
-        html {
-            background: #050910;
-            color: #f8fafc;
-            font-family: 'Outfit', sans-serif;
-            min-height: 100vh;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
-        .bg-tech {
-            background-image:
-                radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.06) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 50%),
-                radial-gradient(circle at 50% 0%, #0f172a 0%, #050910 70%);
+        body {
+            background: #0a0e27;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .glowing-primary {
-            text-shadow: 0 0 30px rgba(14, 165, 233, 0.8);
+        .bg-mesh {
+            background:
+                radial-gradient(ellipse at 20% 10%, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 90%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0e27 0%, #050816 100%);
         }
 
-        .glass-card {
-            background: rgba(15, 23, 42, 0.7);
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .glass-intense {
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(24px);
-            border: 1px solid rgba(14, 165, 233, 0.18);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            box-shadow: 0 0 60px rgba(14, 165, 233, 0.15);
         }
 
-        .input-field {
-            background-color: rgba(2, 6, 23, 0.9);
-            border: 1px solid #1e293b;
-            color: white;
-            transition: all 0.3s ease;
+        .glow-text {
+            text-shadow: 0 0 20px rgba(14, 165, 233, 0.6);
         }
 
-        .input-field:focus {
-            border-color: #0ea5e9;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid #38bdf8;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 28px rgba(14, 165, 233, 0.5);
-        }
-
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .blinking-dot {
-            animation: blink 1.5s infinite;
+        .status-live {
+            background: #10b981;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+            animation: blink 2s ease-in-out infinite;
         }
 
         @keyframes blink {
@@ -84,68 +64,150 @@
             }
 
             50% {
-                opacity: 0.15;
+                opacity: 0.4;
             }
         }
 
-        @keyframes pulse-ring {
-            0% {
-                transform: scale(0.9);
-                opacity: 0.7;
-            }
-
-            100% {
-                transform: scale(1.6);
-                opacity: 0;
-            }
+        .pri-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            letter-spacing: 0.05em;
         }
 
-        @keyframes slide-up {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .animate-slide-up {
-            animation: slide-up 0.4s ease-out;
-        }
-
-        /* Priority badges */
         .pri-1 {
             background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.5);
+            border-color: #ef4444;
             color: #fca5a5;
         }
 
         .pri-2 {
-            background: rgba(245, 158, 11, 0.15);
-            border-color: rgba(245, 158, 11, 0.5);
-            color: #fcd34d;
+            background: rgba(251, 146, 60, 0.15);
+            border-color: #fb923c;
+            color: #fdba74;
         }
 
         .pri-3 {
             background: rgba(34, 197, 94, 0.15);
-            border-color: rgba(34, 197, 94, 0.5);
+            border-color: #22c55e;
             color: #86efac;
         }
 
         .pri-4 {
             background: rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6;
             color: #93c5fd;
         }
 
-        /* Leaflet */
-        .leaflet-container {
-            background: #050910;
+        .input-glass {
+            background: rgba(2, 6, 23, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .input-glass:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
             outline: none;
-            border-radius: 0.75rem;
+        }
+
+        .btn-launch {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-launch:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(14, 165, 233, 0.6);
+        }
+
+        .btn-launch:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .leaflet-container {
+            background: #0a0e27;
+            border-radius: 1rem;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            border-radius: 1rem;
+        }
+
+        .priority-info {
+            font-size: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            border: 1px solid;
+            background-color: rgba(2, 6, 23, 0.6);
+        }
+
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #0ea5e9;
+            border-bottom: 2px solid #0ea5e9;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0ea5e9;
+            border-radius: 10px;
+        }
+
+        .mission-row {
+            transition: all 0.2s ease;
+        }
+
+        .mission-row:hover {
+            background: rgba(14, 165, 233, 0.05);
+        }
+
+        .auto-detect-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            color: #c084fc;
         }
 
         .custom-popup .leaflet-popup-content-wrapper {
@@ -159,235 +221,133 @@
         .custom-popup .leaflet-popup-tip {
             background: #0ea5e9;
         }
-
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #0ea5e9;
-            border-radius: 10px;
-        }
-
-        #map-container {
-            height: 380px;
-            width: 100%;
-            position: relative;
-            z-index: 10;
-            flex-shrink: 0;
-        }
-
-        /* Tab system */
-        .tab-btn {
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .tab-btn.active {
-            color: #0ea5e9;
-            border-bottom: 2px solid #0ea5e9;
-        }
-
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #0ea5e9, transparent);
-            box-shadow: 0 0 10px #0ea5e9;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: slide-up 0.3s ease-out;
-        }
-
-        /* Financial gauge */
-        .gauge-ring {
-            stroke-dasharray: 251;
-            stroke-dashoffset: 251;
-            transition: stroke-dashoffset 1.5s ease-out;
-        }
-
-        /* Status indicators */
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .status-queued {
-            background: #f59e0b;
-            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
-        }
-
-        .status-flight {
-            background: #22c55e;
-            box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
-            animation: blink 1s infinite;
-        }
-
-        .status-completed {
-            background: #3b82f6;
-        }
-
-        .status-failed {
-            background: #ef4444;
-        }
     </style>
 </head>
 
-<body class="p-3 md:p-5 lg:p-6 bg-tech">
+<body class="bg-mesh p-4">
 
-    <!-- HEADER -->
-    <header
-        class="flex flex-col md:flex-row justify-between items-center mb-5 glass-card rounded-2xl p-4 border-t-2 border-t-sky-400/60">
-        <div class="flex items-center gap-3">
-            <div
-                class="w-12 h-12 rounded-full border-[3px] border-sky-400 flex items-center justify-center bg-sky-900/40 shadow-[0_0_20px_rgba(14,165,233,0.5)]">
-                <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                </svg>
-            </div>
-            <div>
-                <h1
-                    class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-cyan-100 tracking-wider uppercase glowing-primary">
-                    LifeFly GCS</h1>
-                <p class="text-[10px] text-sky-300/80 uppercase tracking-[0.25em] font-semibold mt-0.5">Priority UAV
-                    Medical Delivery Network</p>
-            </div>
-        </div>
-
-        <div
-            class="flex flex-wrap items-center gap-3 md:gap-5 mt-3 md:mt-0 bg-black/40 px-4 py-3 rounded-xl border border-sky-900/50">
-            <div class="flex items-center gap-2">
-                <span class="text-slate-500 text-[10px] uppercase font-bold tracking-widest">UTC</span>
-                <span id="clock" class="font-mono text-cyan-300 text-[13px] font-bold"></span>
-            </div>
-            <div class="w-px h-5 bg-slate-700/60 hidden md:block"></div>
-            <div class="flex items-center gap-2">
-                <span class="text-slate-500 text-[10px] uppercase font-bold tracking-widest">Firebase</span>
-                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-green-500/15 border border-green-500/30">
-                    <div class="w-2.5 h-2.5 rounded-full bg-green-400 blinking-dot"></div>
-                    <span class="text-green-300 text-[11px] font-bold tracking-widest uppercase">Live</span>
+    <!-- Header -->
+    <header class="glass-intense border-t-2 border-t-sky-500 rounded-2xl p-4 mb-4">
+        <div class="flex flex-col lg:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-14 h-14 rounded-full bg-gradient-to-br from-sky-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-sky-500/50">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                </div>
+                <div>
+                    <h1
+                        class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-cyan-200 to-blue-300 glow-text tracking-tight">
+                        LifeFly GCS
+                    </h1>
+                    <p class="text-xs text-sky-400 font-semibold tracking-widest uppercase">AI-Powered Priority Medical
+                        UAV Network</p>
                 </div>
             </div>
-            <div class="w-px h-5 bg-slate-700/60 hidden md:block"></div>
-            <div class="flex items-center gap-2">
-                <span class="text-slate-500 text-[10px] uppercase font-bold tracking-widest">RPi SSH</span>
-                <div id="ssh-status-badge"
-                    class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-yellow-500/15 border border-yellow-500/30">
-                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-                    <span class="text-yellow-300 text-[11px] font-bold tracking-widest uppercase">Pending</span>
+
+            <div class="flex flex-wrap items-center gap-4 text-sm bg-black/30 p-2 px-4 rounded-xl">
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-500 text-xs font-bold uppercase tracking-wider">UTC</span>
+                    <span id="clock" class="font-mono text-cyan-300 font-semibold"></span>
                 </div>
-            </div>
-            <div class="w-px h-5 bg-slate-700/60 hidden md:block"></div>
-            <div class="flex items-center gap-2">
-                <span class="text-slate-500 text-[10px] uppercase font-bold tracking-widest">Missions</span>
-                <span id="mission-count" class="font-bold text-sky-400 text-2xl font-mono leading-none">0</span>
+                <div class="h-5 w-px bg-slate-700"></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-500 text-xs font-bold uppercase tracking-wider">Firebase</span>
+                    <div
+                        class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-green-500/10 border border-green-500/30">
+                        <div class="w-2 h-2 rounded-full status-live"></div>
+                        <span class="text-green-400 text-xs font-bold">LIVE</span>
+                    </div>
+                </div>
+                <div class="h-5 w-px bg-slate-700"></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-500 text-xs font-bold uppercase tracking-wider">Active Queue</span>
+                    <span id="mission-count" class="text-xl font-bold text-sky-400 font-mono">0</span>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- MAIN GRID -->
-    <main class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+    <!-- Main Grid -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
-        <!-- LEFT: Deploy Form -->
-        <div class="glass-card rounded-2xl p-5 lg:col-span-4 flex flex-col border-t border-t-sky-400/30">
+        <!-- Left Panel: Dispatch Form -->
+        <div class="lg:col-span-4 glass rounded-2xl p-5 flex flex-col">
             <h2
-                class="text-lg font-bold mb-5 text-white flex items-center gap-2.5 uppercase tracking-widest border-b border-sky-800/60 pb-4">
+                class="text-lg font-bold mb-5 text-white flex items-center gap-2 uppercase tracking-wide border-b border-sky-800/60 pb-3">
                 <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Launch Protocol
+                Deploy UAV
             </h2>
+
             <form id="dispatch-form" class="space-y-4 flex-1 flex flex-col">
                 <div>
-                    <label class="block text-[11px] font-bold text-sky-300 tracking-wider mb-1.5 uppercase">Dest.
-                        Hospital</label>
+                    <label class="block text-xs font-bold text-sky-300 tracking-wide mb-2 uppercase">Destination
+                        Ground</label>
                     <input type="text" id="branch" required placeholder="e.g. Apollo Main Campus"
-                        class="input-field w-full rounded-xl p-3 text-sm font-semibold">
+                        class="input-glass w-full rounded-xl p-3 text-sm font-medium text-white">
                 </div>
 
-                <div class="p-4 rounded-xl bg-[#030712] border border-sky-800/40 relative">
-                    <div
-                        class="absolute -top-2.5 left-5 bg-sky-900 px-3 py-0.5 text-[10px] uppercase font-bold text-white rounded-full">
-                        Target GPS</div>
-                    <div class="grid grid-cols-2 gap-3 mt-1">
+                <div class="glass-intense rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-xs uppercase font-bold text-sky-400">Target Coordinate</div>
+                        <button type="button" id="btn-gps"
+                            class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-sky-500/20 text-sky-300 rounded hover:bg-sky-500/40 border border-sky-500/30 transition-colors flex items-center gap-1.5 cursor-pointer">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Auto-Locate
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label
-                                class="block text-[10px] text-slate-500 mb-1 uppercase font-bold tracking-wider">Lat</label>
+                            <label class="block text-xs text-slate-400 mb-1 uppercase font-semibold">Latitude</label>
                             <input type="number" step="any" id="lat" required placeholder="17.3850"
-                                class="input-field w-full rounded-lg p-2.5 text-[12px] font-mono font-bold">
+                                class="input-glass w-full rounded-lg p-2.5 text-xs font-mono font-bold text-white">
                         </div>
                         <div>
-                            <label
-                                class="block text-[10px] text-slate-500 mb-1 uppercase font-bold tracking-wider">Lng</label>
+                            <label class="block text-xs text-slate-400 mb-1 uppercase font-semibold">Longitude</label>
                             <input type="number" step="any" id="lng" required placeholder="78.4867"
-                                class="input-field w-full rounded-lg p-2.5 text-[12px] font-mono font-bold">
+                                class="input-glass w-full rounded-lg p-2.5 text-xs font-mono font-bold text-white">
                         </div>
                     </div>
-                    <button type="button" id="btn-gps"
-                        class="mt-3 text-sky-300 text-[11px] font-bold uppercase tracking-widest w-full hover:bg-sky-800 hover:text-white transition-all bg-sky-900/30 py-2.5 rounded-lg border border-sky-500/40 flex justify-center items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
-                            </path>
-                        </svg>
-                        Acquire GPS Lock
-                    </button>
                 </div>
 
-                <!-- PRIORITY SELECTOR -->
                 <div>
-                    <label class="block text-[11px] font-bold text-sky-300 tracking-wider mb-2 uppercase">Mission
-                        Priority</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="setPriority(1)" id="pri-btn-1"
-                            class="pri-selector rounded-lg py-2.5 px-3 text-[11px] font-bold uppercase tracking-wider border transition-all hover:scale-[1.03] bg-red-500/10 border-red-500/30 text-red-300">
-                            ⚡ P1 Critical
-                        </button>
-                        <button type="button" onclick="setPriority(2)" id="pri-btn-2"
-                            class="pri-selector rounded-lg py-2.5 px-3 text-[11px] font-bold uppercase tracking-wider border transition-all hover:scale-[1.03] bg-amber-500/10 border-amber-500/30 text-amber-300">
-                            🔥 P2 Urgent
-                        </button>
-                        <button type="button" onclick="setPriority(3)" id="pri-btn-3"
-                            class="pri-selector rounded-lg py-2.5 px-3 text-[11px] font-bold uppercase tracking-wider border transition-all hover:scale-[1.03] bg-green-500/10 border-green-500/30 text-green-300 ring-2 ring-green-500/40">
-                            📦 P3 Standard
-                        </button>
-                        <button type="button" onclick="setPriority(4)" id="pri-btn-4"
-                            class="pri-selector rounded-lg py-2.5 px-3 text-[11px] font-bold uppercase tracking-wider border transition-all hover:scale-[1.03] bg-blue-500/10 border-blue-500/30 text-blue-300">
-                            📋 P4 Low
-                        </button>
+                    <label class="block text-xs font-bold text-sky-300 tracking-wide mb-2 uppercase">Payload
+                        Definition</label>
+                    <textarea id="payload" required rows="3" placeholder="e.g. Blood Pack O-Negative Emergency..."
+                        class="input-glass w-full rounded-xl p-3 text-sm font-medium text-white resize-none"></textarea>
+
+                    <div class="mt-2 flex items-center gap-2">
+                        <div class="auto-detect-badge">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M13 7H7v6h6V7z" />
+                                <path fill-rule="evenodd"
+                                    d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            AI Priority Detector
+                        </div>
                     </div>
-                    <input type="hidden" id="priority" value="3">
                 </div>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-sky-300 tracking-wider mb-1.5 uppercase">Payload
-                        Manifest</label>
-                    <textarea id="details" required rows="3" placeholder="Blood Pack O-Negative Emergency..."
-                        class="input-field w-full rounded-xl p-3 text-[12px] font-semibold resize-none"></textarea>
-                </div>
+                <!-- Classic AI Priority Info Box -->
+                <div id="priority-info" class="priority-info transition-all duration-300" style="display: none;"></div>
 
                 <div class="flex-1"></div>
+
                 <button type="submit" id="btn-submit"
-                    class="btn-primary w-full py-4 rounded-xl font-bold uppercase tracking-widest mt-auto shadow-[0_0_25px_rgba(14,165,233,0.4)] flex justify-center items-center gap-2.5">
-                    <span class="text-[13px] font-extrabold text-white">Initiate Launch</span>
-                    <svg id="spinner" class="animate-spin h-5 w-5 hidden text-white" viewBox="0 0 24 24" fill="none">
+                    class="btn-launch w-full py-4 rounded-xl font-bold uppercase tracking-widest text-white flex items-center justify-center gap-3">
+                    <span class="text-sm">Initiate Launch</span>
+                    <svg id="spinner" class="hidden animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
                         </circle>
                         <path class="opacity-75" fill="currentColor"
@@ -398,153 +358,78 @@
             </form>
         </div>
 
-        <!-- RIGHT: Map + Tabs -->
-        <div class="lg:col-span-8 flex flex-col gap-5">
+        <!-- Right Panel: Map + Tabs -->
+        <div class="lg:col-span-8 flex flex-col gap-4">
 
             <!-- Map -->
-            <div class="glass-card rounded-2xl p-2.5 relative border-t border-t-sky-400/30 w-full flex-shrink-0"
-                style="height: 400px;">
-                <div class="absolute top-5 left-5 z-[1000] pointer-events-none">
-                    <h2
-                        class="text-[10px] font-bold text-white uppercase tracking-widest px-4 py-2 bg-black/70 rounded-lg border border-sky-400/25 backdrop-blur-md flex items-center gap-2.5">
-                        <div class="w-2 h-2 rounded-full bg-red-500 blinking-dot shadow-[0_0_8px_#ef4444]"></div>
-                        Tactical Sat-View
-                    </h2>
+            <div class="glass rounded-2xl p-2 relative" style="height: 400px;">
+                <div class="absolute top-4 left-4 z-[1000] glass-intense rounded-lg px-4 py-2 pointer-events-none">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-red-500 status-live"></div>
+                        Tactical Satellite
+                    </h3>
                 </div>
-                <div id="map-container" class="w-full h-full rounded-xl border border-slate-700/60 overflow-hidden">
-                    <div id="map" class="w-full h-full z-0"></div>
-                </div>
+                <div id="map"></div>
             </div>
 
-            <!-- TABS: Queue / Financial / SSH Status -->
-            <div class="glass-card rounded-2xl p-5 flex-1 flex flex-col overflow-hidden border-t border-t-sky-400/30">
-                <!-- Tab Buttons -->
-                <div class="flex items-center gap-1 mb-4 border-b border-sky-800/50 pb-3">
+            <!-- Tabs -->
+            <div class="glass rounded-2xl p-5 flex-1">
+                <div class="flex items-center gap-1 mb-4 border-b border-sky-800/50">
                     <button onclick="switchTab('queue')"
-                        class="tab-btn active px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors rounded-t-lg"
+                        class="tab-btn active px-4 py-2 text-xs font-bold uppercase text-slate-400 hover:text-white"
                         data-tab="queue">
                         📡 Operations Queue
                     </button>
-                    <button onclick="switchTab('financial')"
-                        class="tab-btn px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors rounded-t-lg"
-                        data-tab="financial">
-                        💰 Financial Dashboard
-                    </button>
                     <button onclick="switchTab('telemetry')"
-                        class="tab-btn px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors rounded-t-lg"
+                        class="tab-btn px-4 py-2 text-xs font-bold uppercase text-slate-400 hover:text-white"
                         data-tab="telemetry">
                         🛰️ UAV Telemetry
                     </button>
                 </div>
 
-                <!-- TAB 1: Queue -->
-                <div id="tab-queue"
-                    class="tab-content active overflow-y-auto flex-1 pr-2 rounded-lg border border-slate-800/40 bg-[#050910]/60 p-2">
-                    <table class="w-full text-left whitespace-nowrap">
+                <!-- Tab: Queue -->
+                <div id="tab-queue" class="tab-content active overflow-y-auto" style="max-height: 400px;">
+                    <table class="w-full text-left">
                         <thead
-                            class="sticky top-0 bg-[#080d16] z-10 text-[10px] uppercase font-bold tracking-widest text-sky-400">
+                            class="sticky top-0 bg-slate-900/95 text-[10px] uppercase font-bold tracking-wider text-sky-400">
                             <tr>
-                                <th class="py-3 px-4">Priority</th>
-                                <th class="py-3 px-4">Mission ID</th>
-                                <th class="py-3 px-4">Target Branch</th>
-                                <th class="py-3 px-4">Payload</th>
-                                <th class="py-3 px-4">Status</th>
-                                <th class="py-3 px-4 text-right">Cost (₹)</th>
+                                <th class="py-3 px-3">Priority</th>
+                                <th class="py-3 px-3">Mission ID</th>
+                                <th class="py-3 px-3">Branch</th>
+                                <th class="py-3 px-3">Payload</th>
+                                <th class="py-3 px-3">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="queue-body" class="divide-y divide-slate-800/50 text-slate-300"></tbody>
+                        <tbody id="queue-body" class="text-slate-300 text-sm"></tbody>
                     </table>
                 </div>
 
-                <!-- TAB 2: Financial -->
-                <div id="tab-financial" class="tab-content overflow-y-auto flex-1">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Total
-                                Revenue</div>
-                            <div id="fin-revenue" class="text-xl font-bold font-mono text-emerald-400">₹0</div>
-                        </div>
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Total Cost
-                            </div>
-                            <div id="fin-cost" class="text-xl font-bold font-mono text-amber-400">₹0</div>
-                        </div>
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Profit
-                            </div>
-                            <div id="fin-profit" class="text-xl font-bold font-mono text-sky-400">₹0</div>
-                        </div>
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Avg
-                                Cost/Mission</div>
-                            <div id="fin-avg" class="text-xl font-bold font-mono text-purple-400">₹0</div>
-                        </div>
-                    </div>
-
-                    <!-- Priority Cost Breakdown -->
-                    <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30 mb-4">
-                        <h3 class="text-[11px] font-bold text-sky-400 uppercase tracking-widest mb-3">Cost by Priority
-                            Level</h3>
-                        <div id="fin-priority-bars" class="space-y-2"></div>
-                    </div>
-
-                    <!-- Recent Transactions -->
-                    <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                        <h3 class="text-[11px] font-bold text-sky-400 uppercase tracking-widest mb-3">Recent Financial
-                            Records</h3>
-                        <div id="fin-transactions" class="space-y-1.5 max-h-[200px] overflow-y-auto"></div>
-                    </div>
-                </div>
-
-                <!-- TAB 3: Telemetry -->
-                <div id="tab-telemetry" class="tab-content overflow-y-auto flex-1">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Mode</div>
+                <!-- Tab: Telemetry -->
+                <div id="tab-telemetry" class="tab-content overflow-y-auto" style="max-height: 400px;">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="glass-intense rounded-xl p-4">
+                            <div class="text-[10px] text-slate-500 uppercase font-bold mb-1">Flight Mode</div>
                             <div id="telem-mode" class="text-lg font-bold font-mono text-sky-400">—</div>
                         </div>
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Armed</div>
-                            <div id="telem-armed" class="text-lg font-bold font-mono text-amber-400">—</div>
-                        </div>
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Battery
-                            </div>
+                        <div class="glass-intense rounded-xl p-4">
+                            <div class="text-[10px] text-slate-500 uppercase font-bold mb-1">Battery</div>
                             <div id="telem-battery" class="text-lg font-bold font-mono text-emerald-400">—</div>
                         </div>
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Altitude
-                            </div>
+                        <div class="glass-intense rounded-xl p-4">
+                            <div class="text-[10px] text-slate-500 uppercase font-bold mb-1">Altitude</div>
                             <div id="telem-altitude" class="text-lg font-bold font-mono text-purple-400">—</div>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Speed</div>
-                            <div id="telem-speed" class="text-lg font-bold font-mono text-cyan-400">—</div>
-                        </div>
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">GPS Sats
-                            </div>
+                        <div class="glass-intense rounded-xl p-4">
+                            <div class="text-[10px] text-slate-500 uppercase font-bold mb-1">GPS Sats</div>
                             <div id="telem-gps" class="text-lg font-bold font-mono text-green-400">—</div>
                         </div>
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Position
-                            </div>
-                            <div id="telem-pos" class="text-sm font-bold font-mono text-sky-300">—</div>
+                        <div class="glass-intense rounded-xl p-4 md:col-span-2">
+                            <div class="text-[10px] text-slate-500 uppercase font-bold mb-1">Coordinates</div>
+                            <div id="telem-pos" class="text-lg font-bold font-mono text-cyan-400">—</div>
                         </div>
-                        <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Last Update
-                            </div>
-                            <div id="telem-update" class="text-xs font-bold font-mono text-slate-400">—</div>
-                        </div>
-                    </div>
-
-                    <!-- Mission Acknowledgments -->
-                    <div class="bg-[#0a1020] rounded-xl p-4 border border-sky-800/30">
-                        <h3 class="text-[11px] font-bold text-sky-400 uppercase tracking-widest mb-3">Pi ↔ GCS Mission
-                            Acknowledgments</h3>
-                        <div id="ack-feed" class="space-y-1.5 max-h-[200px] overflow-y-auto font-mono text-[11px]">
+                        <div class="glass-intense rounded-xl p-4 md:col-span-2">
+                            <div class="text-[10px] text-slate-500 uppercase font-bold mb-1">Speed</div>
+                            <div id="telem-speed" class="text-lg font-bold font-mono text-yellow-500">—</div>
                         </div>
                     </div>
                 </div>
@@ -552,13 +437,11 @@
         </div>
     </main>
 
-    <!-- Toasts -->
-    <div id="toast-container" class="fixed bottom-8 right-8 flex flex-col gap-3 pointer-events-none z-[9999]"></div>
-
-    <!-- Firebase SDK -->
+    <!-- App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCgHXLUhpMhw0X2XMfoh6WYGey0Y1bFmWI",
@@ -567,137 +450,111 @@
             projectId: "lifefly",
             storageBucket: "lifefly.firebasestorage.app",
             messagingSenderId: "1030073439901",
-            appId: "1:1030073439901:web:53f36751d9719152ebe674",
-            measurementId: "G-F1Y3H6JRX4"
+            appId: "1:1030073439901:web:53f36751d9719152ebe674"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        signInAnonymously(auth).catch(e => console.error("Firebase auth failed:", e));
+
         const missionsRef = ref(db, 'missions');
         const statusRef = ref(db, 'uav_status');
-        const financialRef = ref(db, 'financial_log');
-        const ackRef = ref(db, 'mission_ack');
-        const analyticsRef = ref(db, 'financial_analytics');
+        const trackRef = ref(db, 'drone_track');
 
-        // ═══ MAP ═══
+        // MAP SETUP
         const map = L.map('map', { zoomControl: false }).setView([17.3850, 78.4867], 12);
         L.control.zoom({ position: 'topright' }).addTo(map);
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri', maxZoom: 18
+            attribution: 'Esri', maxZoom: 18
         }).addTo(map);
-        setTimeout(() => map.invalidateSize(), 800);
+
+        setTimeout(() => map.invalidateSize(), 500);
         window.addEventListener('resize', () => map.invalidateSize());
 
         let mapMarkers = {};
+        let droneMarker = null;
 
-        // Priority-colored icons
-        const priColors = { 1: '#ef4444', 2: '#f59e0b', 3: '#22c55e', 4: '#3b82f6' };
-
-        function createIcon(priority) {
-            const color = priColors[priority] || '#22d3ee';
-            return L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div class="relative w-10 h-10 flex items-center justify-center">
-                    <div class="absolute inset-0 rounded-full animate-ping" style="background:${color}33;"></div>
-                    <div class="w-4 h-4 rounded-full border-[3px] border-[#050910] z-10 shadow-lg" style="background:${color};box-shadow:0 0 20px ${color};"></div>
-                </div>`,
-                iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -8]
-            });
-        }
-
-        // Base station marker
+        // Custom base and drone icons
         const baseIcon = L.divIcon({
             className: 'custom-div-icon',
-            html: `<div class="relative w-12 h-12 flex items-center justify-center">
-                <div class="absolute inset-0 bg-sky-400/20 rounded-full"></div>
-                <div class="w-5 h-5 bg-white border-[3px] border-sky-500 rounded-sm rotate-45 z-10 shadow-[0_0_15px_#0ea5e9]"></div>
-            </div>`,
-            iconSize: [48, 48], iconAnchor: [24, 24], popupAnchor: [0, -10]
+            html: `<div style="background:rgba(14,165,233,0.2); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                   <div style="background:white; border:3px solid #0ea5e9; width:16px; height:16px; transform:rotate(45deg);"></div>
+                   </div>`,
+            iconSize: [40, 40], iconAnchor: [20, 20]
         });
-        L.marker([17.3850, 78.4867], { icon: baseIcon }).addTo(map)
-            .bindPopup('<div class="custom-popup px-3 py-2"><h3 class="font-mono font-bold text-sky-400 text-sm">🏥 BASE STATION</h3><p class="text-xs text-slate-300 mt-1">Central Hub — Hyderabad</p></div>');
+        L.marker([17.3850, 78.4867], { icon: baseIcon }).addTo(map).bindPopup("<b>GCS Base Station</b>");
 
-        const updateMapMarkers = (missions) => {
-            Object.values(mapMarkers).forEach(m => map.removeLayer(m));
-            mapMarkers = {};
-            const bounds = [[17.3850, 78.4867]];
+        const droneIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background:rgba(16,185,129,0.3); width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; animation: blink 1s infinite;">
+                   <div style="background:#10b981; border:2px solid black; width:12px; height:12px; border-radius:50%;"></div>
+                   </div>`,
+            iconSize: [30, 30], iconAnchor: [15, 15]
+        });
 
-            missions.forEach(m => {
-                if (m.latitude && m.longitude) {
-                    const pri = m.priority || 3;
-                    const marker = L.marker([m.latitude, m.longitude], { icon: createIcon(pri) }).addTo(map);
-                    const priLabel = m.priority_label || `P${pri}`;
-                    const priClass = `pri-${pri}`;
-                    marker.bindPopup(`
-                        <div class="custom-popup px-3 py-2">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-mono font-bold text-sky-400 text-sm">${m.request_id || 'UAV-00X'}</h3>
-                                <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded border ${priClass}">${priLabel}</span>
-                            </div>
-                            <div class="space-y-1 text-xs text-slate-200">
-                                <p><strong class="text-slate-400 text-[10px] uppercase">LZ:</strong> ${m.branch_name}</p>
-                                <p><strong class="text-slate-400 text-[10px] uppercase">Payload:</strong> ${m.request_details}</p>
-                                ${m.financial ? `<p><strong class="text-slate-400 text-[10px] uppercase">Cost:</strong> ₹${m.financial.total_cost?.toLocaleString() || '—'}</p>` : ''}
-                            </div>
-                            <div class="mt-2 text-right">
-                                <span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-[10px] rounded font-bold uppercase border border-yellow-500/40">${m.status || 'QUEUED'}</span>
-                            </div>
-                        </div>
-                    `);
-                    mapMarkers[m.request_id || m.id] = marker;
-                    bounds.push([m.latitude, m.longitude]);
+        // ═══ CLASSIC AI DETECTOR FUNCTION ═══
+        function detectPriority(text) {
+            text = text.toLowerCase();
+            const critical = ['blood', 'plasma', 'organ', 'kidney', 'lung', 'heart', 'venom', 'anti-venom', 'epinephrine', 'trauma', 'hemorrhage', 'stroke', 'emergency', 'critical', 'resuscitation', 'sepsis', 'defibrillator'];
+            const urgent = ['insulin', 'diabetic', 'surgery', 'surgical', 'oxygen', 'o2', 'burn', 'fracture', 'urgent', 'chemotherapy', 'asthma'];
+            const low = ['records', 'paperwork', 'ppe', 'gloves', 'document', 'routine', 'supplies', 'inventory'];
 
-                    // Draw flight path line from base
-                    L.polyline([[17.3850, 78.4867], [m.latitude, m.longitude]], {
-                        color: priColors[pri] || '#22d3ee',
-                        weight: 1.5,
-                        opacity: 0.35,
-                        dashArray: '8, 8'
-                    }).addTo(map);
-                }
-            });
+            for (let kw of critical) if (text.includes(kw)) return { priority: 1, label: 'P1-CRITICAL', color: '#ef4444', desc: '⚡ LIFE-THREATENING — Immediate UAV dispatch', reason: `Detected: "${kw}"` };
+            for (let kw of urgent) if (text.includes(kw)) return { priority: 2, label: 'P2-URGENT', color: '#fb923c', desc: '🔥 TIME-SENSITIVE — Dispatch within 10 minutes', reason: `Detected: "${kw}"` };
+            for (let kw of low) if (text.includes(kw)) return { priority: 4, label: 'P4-LOW', color: '#3b82f6', desc: '📋 NON-URGENT — Batch delivery', reason: `Detected: "${kw}"` };
 
-            if (bounds.length > 1) {
-                map.fitBounds(bounds, { padding: [60, 60], maxZoom: 14 });
-            }
-        };
-
-        // ═══ CLOCK ═══
-        function updateClock() {
-            document.getElementById('clock').textContent = new Date().toISOString().replace('T', ' ').substring(0, 19) + 'Z';
+            return { priority: 3, label: 'P3-STANDARD', color: '#22c55e', desc: '📦 ROUTINE — Standard scheduled delivery', reason: 'Default classification' };
         }
-        setInterval(updateClock, 1000); updateClock();
 
-        // ═══ TOAST ═══
-        window.showToast = (title, type = 'info') => {
-            const container = document.getElementById('toast-container');
-            const el = document.createElement('div');
-            let style = type === 'error' ? 'bg-red-950/90 border-red-500 text-red-200'
-                : type === 'warning' ? 'bg-amber-950/90 border-amber-500 text-amber-200'
-                    : 'bg-emerald-950/90 border-emerald-500 text-emerald-200';
-            el.className = `${style} border px-5 py-3.5 rounded-xl shadow-2xl backdrop-blur-xl transform transition-all duration-400 translate-y-8 opacity-0 flex items-center gap-3 font-bold text-[12px] tracking-wider uppercase`;
-            el.innerHTML = `<span>${title}</span>`;
-            container.appendChild(el);
-            requestAnimationFrame(() => el.classList.remove('translate-y-8', 'opacity-0'));
-            setTimeout(() => {
-                el.classList.add('opacity-0', 'translate-x-8');
-                setTimeout(() => el.remove(), 400);
-            }, 3500);
-        };
+        // Live UI update for AI Detector
+        document.getElementById('payload').addEventListener('input', (e) => {
+            const payload = e.target.value;
+            const info = document.getElementById('priority-info');
+            if (payload.length > 2) {
+                const detected = detectPriority(payload);
+                info.style.display = 'block';
+                info.style.borderColor = detected.color;
+                info.innerHTML = `
+                    <div style="display: flex; align-items: start; gap: 0.5rem; justify-content: space-between;">
+                        <div>
+                            <strong style="color: ${detected.color}; font-family: 'JetBrains Mono'; font-size: 0.8rem;">${detected.label}</strong>
+                            <div style="font-size: 0.70rem; color: #cbd5e1; margin-top: 2px;">${detected.desc}</div>
+                        </div>
+                        <div style="font-size: 0.65rem; color: #94a3b8; font-style: italic; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 4px;">
+                            ${detected.reason}
+                        </div>
+                    </div>`;
+            } else {
+                info.style.display = 'none';
+            }
+        });
 
-        // ═══ PRIORITY SELECTOR ═══
-        window.selectedPriority = 3;
-        window.setPriority = (pri) => {
-            window.selectedPriority = pri;
-            document.getElementById('priority').value = pri;
-            document.querySelectorAll('.pri-selector').forEach(btn => {
-                btn.classList.remove('ring-2', 'ring-red-500/40', 'ring-amber-500/40', 'ring-green-500/40', 'ring-blue-500/40');
-            });
-            const ringColors = { 1: 'ring-red-500/40', 2: 'ring-amber-500/40', 3: 'ring-green-500/40', 4: 'ring-blue-500/40' };
-            document.getElementById(`pri-btn-${pri}`).classList.add('ring-2', ringColors[pri]);
-        };
+        // ═══ GPS ═══
+        document.getElementById('btn-gps').addEventListener('click', () => {
+            const btn = document.getElementById('btn-gps');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-pulse">Locating...</span>';
 
-        // ═══ TAB SYSTEM ═══
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        document.getElementById('lat').value = pos.coords.latitude.toFixed(6);
+                        document.getElementById('lng').value = pos.coords.longitude.toFixed(6);
+                        map.flyTo([pos.coords.latitude, pos.coords.longitude], 15, { duration: 1.5 });
+                        btn.innerHTML = originalText;
+                    },
+                    (err) => { alert('GPS Error: ' + err.message); btn.innerHTML = originalText; },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser.');
+                btn.innerHTML = originalText;
+            }
+        });
+
+        // ═══ UI HELPERS ═══
         window.switchTab = (tab) => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -705,293 +562,31 @@
             document.getElementById(`tab-${tab}`).classList.add('active');
         };
 
-        // ═══ GPS ═══
-        document.getElementById('btn-gps').addEventListener('click', () => {
-            if (navigator.geolocation) {
-                window.showToast('Acquiring GPS signal...', 'info');
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        document.getElementById('lat').value = pos.coords.latitude.toFixed(6);
-                        document.getElementById('lng').value = pos.coords.longitude.toFixed(6);
-                        window.showToast('GPS Lock Acquired', 'success');
-                        setTimeout(() => map.invalidateSize(), 100);
-                        map.flyTo([pos.coords.latitude, pos.coords.longitude], 15, { duration: 1.5 });
-                    },
-                    (err) => window.showToast(`GPS Error: ${err.message}`, 'error'),
-                    { enableHighAccuracy: true }
-                );
-            }
-        });
+        setInterval(() => {
+            document.getElementById('clock').textContent = new Date().toISOString().replace('T', ' ').slice(0, 19) + 'Z';
+        }, 1000);
 
-        // ═══ HAVERSINE ═══
-        function haversine(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-            return R * 2 * Math.asin(Math.sqrt(a));
-        }
-
-        // ═══ FINANCIAL CALCULATOR ═══
-        function calculateCost(distKm, priority, payloadText) {
-            const rates = {
-                blood: 45, defibrillator: 62, venom: 55, insulin: 30,
-                surgical: 38, oxygen: 42, lab: 18, medication: 15, ppe: 12, records: 10
-            };
-            let baseRate = 20;
-            const pl = payloadText.toLowerCase();
-            for (const [k, v] of Object.entries(rates)) {
-                if (pl.includes(k)) { baseRate = v; break; }
-            }
-
-            const priMult = { 1: 2.5, 2: 1.8, 3: 1.0, 4: 0.7 };
-            const mult = priMult[priority] || 1.0;
-            const priSurcharge = { 1: 500, 2: 200, 3: 0, 4: 0 };
-
-            const flightCost = distKm * baseRate * mult;
-            const fuelCost = distKm * 8.50;
-            const insurance = flightCost * 0.05;
-            const platformFee = 150;
-            const maintenance = 75;
-            const pilotCost = (distKm / 48) * 500;
-            const depreciation = 120;
-            const surcharge = priSurcharge[priority] || 0;
-            const handling = 100;
-
-            const total = flightCost + fuelCost + insurance + platformFee + maintenance + pilotCost + depreciation + surcharge + handling;
-            const revenue = total * (1 + 0.35) * (priority <= 2 ? 1.5 : 1);
-            const subsidy = revenue * 0.15;
-
-            return {
-                flight_cost: Math.round(flightCost * 100) / 100,
-                fuel_cost: Math.round(fuelCost * 100) / 100,
-                insurance: Math.round(insurance * 100) / 100,
-                platform_fee: platformFee,
-                maintenance, depreciation,
-                pilot_cost: Math.round(pilotCost * 100) / 100,
-                priority_surcharge: surcharge,
-                handling_fee: handling,
-                total_cost: Math.round(total * 100) / 100,
-                gross_revenue: Math.round(revenue * 100) / 100,
-                government_subsidy: Math.round(subsidy * 100) / 100,
-                net_revenue: Math.round((revenue - subsidy) * 100) / 100,
-                profit: Math.round((revenue - subsidy - total) * 100) / 100,
-                distance_km: Math.round(distKm * 100) / 100,
-                cost_per_km: Math.round(baseRate * mult * 100) / 100,
-                priority_multiplier: mult,
-                currency: 'INR'
-            };
-        }
-
-        // ═══ RENDER QUEUE TABLE ═══
-        function renderTable(dataArray) {
-            const tbody = document.getElementById('queue-body');
-            document.getElementById('mission-count').textContent = dataArray.length;
-
-            if (dataArray.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-14 text-sky-900 font-bold text-[12px] tracking-[0.15em] uppercase">No Active UAV Operations</td></tr>';
-                return;
-            }
-
-            // Sort by priority (lowest number = highest priority)
-            const sorted = [...dataArray].sort((a, b) => (a.priority || 3) - (b.priority || 3));
-
-            tbody.innerHTML = sorted.map(m => {
-                const pri = m.priority || 3;
-                const priLabel = m.priority_label || `P${pri}`;
-                const priClass = `pri-${pri}`;
-                const cost = m.financial?.total_cost || 0;
-                const statusColors = {
-                    QUEUED: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
-                    TRANSMITTED: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-                    ARMING: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
-                    ARMED: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
-                    IN_FLIGHT: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-                    AT_TARGET: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
-                    DELIVERED: 'bg-green-500/15 text-green-400 border-green-500/30',
-                    COMPLETED: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
-                    FAILED: 'bg-red-500/15 text-red-400 border-red-500/30',
-                };
-                const statusClass = statusColors[m.status] || statusColors.QUEUED;
-
-                return `
-                <tr class="transition-colors hover:bg-sky-900/10 animate-slide-up">
-                    <td class="py-3 px-4">
-                        <span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded border ${priClass}">${priLabel}</span>
-                    </td>
-                    <td class="py-3 px-4">
-                        <span class="font-mono text-cyan-300 font-bold text-[12px] uppercase">${m.request_id || m.id}</span>
-                    </td>
-                    <td class="py-3 px-4">
-                        <div class="font-semibold text-[13px] text-white">${m.branch_name}</div>
-                        <div class="text-[10px] font-mono text-cyan-500/70 mt-0.5">${parseFloat(m.latitude).toFixed(4)}, ${parseFloat(m.longitude).toFixed(4)}</div>
-                    </td>
-                    <td class="py-3 px-4 text-[12px] text-sky-100 font-medium truncate max-w-[180px]" title="${m.request_details}">${m.request_details}</td>
-                    <td class="py-3 px-4">
-                        <span class="px-2 py-1 text-[10px] font-bold uppercase rounded border ${statusClass}">${m.status || 'QUEUED'}</span>
-                    </td>
-                    <td class="py-3 px-4 text-right font-mono text-[12px] font-bold text-emerald-400">₹${cost.toLocaleString()}</td>
-                </tr>`;
-            }).join('');
-        }
-
-        // ═══ RENDER FINANCIAL DASHBOARD ═══
-        function renderFinancial(dataArray) {
-            let totalCost = 0, totalRevenue = 0, totalProfit = 0;
-            const priCosts = { 1: 0, 2: 0, 3: 0, 4: 0 };
-            const priCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
-
-            dataArray.forEach(m => {
-                const fin = m.financial || {};
-                const cost = fin.total_cost || 0;
-                const rev = fin.net_revenue || fin.gross_revenue || cost * 1.35;
-                totalCost += cost;
-                totalRevenue += rev;
-                totalProfit += (rev - cost);
-
-                const pri = m.priority || 3;
-                if (priCosts[pri] !== undefined) {
-                    priCosts[pri] += cost;
-                    priCounts[pri]++;
-                }
-            });
-
-            document.getElementById('fin-revenue').textContent = `₹${Math.round(totalRevenue).toLocaleString()}`;
-            document.getElementById('fin-cost').textContent = `₹${Math.round(totalCost).toLocaleString()}`;
-            document.getElementById('fin-profit').textContent = `₹${Math.round(totalProfit).toLocaleString()}`;
-            document.getElementById('fin-avg').textContent = `₹${Math.round(totalCost / Math.max(dataArray.length, 1)).toLocaleString()}`;
-
-            // Priority bars
-            const maxCost = Math.max(...Object.values(priCosts), 1);
-            const priLabels = { 1: 'P1-CRITICAL', 2: 'P2-URGENT', 3: 'P3-STANDARD', 4: 'P4-LOW' };
-            const priBarColors = { 1: 'bg-red-500', 2: 'bg-amber-500', 3: 'bg-green-500', 4: 'bg-blue-500' };
-
-            document.getElementById('fin-priority-bars').innerHTML = [1, 2, 3, 4].map(pri => `
-                <div class="flex items-center gap-3">
-                    <span class="text-[10px] font-bold uppercase tracking-wider w-24 text-slate-400">${priLabels[pri]}</span>
-                    <div class="flex-1 bg-slate-800/40 rounded-full h-3 overflow-hidden">
-                        <div class="${priBarColors[pri]} h-full rounded-full transition-all duration-1000" style="width: ${(priCosts[pri] / maxCost * 100)}%"></div>
-                    </div>
-                    <span class="text-[11px] font-mono font-bold text-slate-300 w-28 text-right">₹${Math.round(priCosts[pri]).toLocaleString()} (${priCounts[pri]})</span>
-                </div>
-            `).join('');
-
-            // Recent transactions
-            const recent = [...dataArray].reverse().slice(0, 10);
-            document.getElementById('fin-transactions').innerHTML = recent.map(m => {
-                const fin = m.financial || {};
-                const pri = m.priority || 3;
-                const priClass = `pri-${pri}`;
-                return `
-                <div class="flex items-center justify-between py-1.5 px-3 rounded-lg hover:bg-white/5 transition-colors">
-                    <div class="flex items-center gap-2">
-                        <span class="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border ${priClass}">${m.priority_label || 'P' + pri}</span>
-                        <span class="font-mono text-[11px] text-cyan-300">${m.request_id || '—'}</span>
-                        <span class="text-[11px] text-slate-500">${m.branch_name?.substring(0, 20) || ''}</span>
-                    </div>
-                    <span class="font-mono text-[11px] font-bold text-emerald-400">₹${(fin.total_cost || 0).toLocaleString()}</span>
-                </div>`;
-            }).join('');
-        }
-
-        // ═══ FIREBASE LISTENERS ═══
-
-        // Missions
-        onValue(missionsRef, (snapshot) => {
-            const data = snapshot.val();
-            const dataArray = [];
-            if (data) {
-                Object.entries(data).forEach(([key, val]) => {
-                    dataArray.push({ id: key, ...val });
-                });
-            }
-            renderTable(dataArray);
-            renderFinancial(dataArray);
-            updateMapMarkers(dataArray);
-        });
-
-        // UAV Telemetry
-        onValue(statusRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                document.getElementById('telem-mode').textContent = data.mode || '—';
-                document.getElementById('telem-armed').textContent = data.armed ? 'YES' : 'NO';
-                document.getElementById('telem-armed').className = `text-lg font-bold font-mono ${data.armed ? 'text-red-400' : 'text-green-400'}`;
-                document.getElementById('telem-battery').textContent = `${data.battery_pct || 0}%`;
-                document.getElementById('telem-altitude').textContent = `${data.altitude_m || 0}m`;
-                document.getElementById('telem-speed').textContent = `${data.ground_speed_ms || 0} m/s`;
-                document.getElementById('telem-gps').textContent = data.gps_satellites || '—';
-                document.getElementById('telem-pos').textContent = `${data.lat || '—'}, ${data.lng || '—'}`;
-                document.getElementById('telem-update').textContent = data.last_heartbeat ? new Date(data.last_heartbeat).toLocaleTimeString() : '—';
-
-                // Update SSH status badge
-                const badge = document.getElementById('ssh-status-badge');
-                if (data.simulation) {
-                    badge.innerHTML = `<div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div><span class="text-amber-300 text-[11px] font-bold tracking-widest uppercase">Sim</span>`;
-                    badge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/15 border border-amber-500/30';
-                } else {
-                    badge.innerHTML = `<div class="w-2.5 h-2.5 rounded-full bg-green-400 blinking-dot"></div><span class="text-green-300 text-[11px] font-bold tracking-widest uppercase">Online</span>`;
-                    badge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded bg-green-500/15 border border-green-500/30';
-                }
-            }
-        });
-
-        // Mission Acknowledgments
-        onValue(ackRef, (snapshot) => {
-            const data = snapshot.val();
-            const feed = document.getElementById('ack-feed');
-            if (data) {
-                const acks = Object.values(data).reverse().slice(0, 20);
-                feed.innerHTML = acks.map(a => {
-                    const statusColor = {
-                        RECEIVED: 'text-sky-400', ARMING: 'text-amber-400', IN_FLIGHT: 'text-emerald-400',
-                        AT_TARGET: 'text-cyan-400', DELIVERED: 'text-green-400', COMPLETED: 'text-sky-300',
-                        FAILED: 'text-red-400'
-                    }[a.status] || 'text-slate-400';
-                    return `
-                    <div class="flex items-center gap-2 py-1 px-2 rounded hover:bg-white/5">
-                        <span class="text-slate-600">${new Date(a.timestamp).toLocaleTimeString()}</span>
-                        <span class="text-cyan-300">${a.mission_id}</span>
-                        <span class="${statusColor} font-bold">${a.status}</span>
-                        <span class="text-slate-500 flex-1 truncate">${a.details || ''}</span>
-                        <span class="text-[9px] text-slate-600 uppercase">${a.source || ''}</span>
-                    </div>`;
-                }).join('');
-            } else {
-                feed.innerHTML = '<div class="text-slate-600 py-4 text-center">No acknowledgments yet. Start rpi_receiver.py on the Pi.</div>';
-            }
-        });
-
-        // ═══ FORM SUBMIT ═══
+        // ═══ FORM SUBMISSION ═══
         let mCount = 1000;
-
         document.getElementById('dispatch-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-submit');
             const spinner = document.getElementById('spinner');
 
             mCount++;
-            const lat = parseFloat(document.getElementById('lat').value);
-            const lng = parseFloat(document.getElementById('lng').value);
-            const priority = parseInt(document.getElementById('priority').value) || 3;
-            const payloadText = document.getElementById('details').value;
+            const payloadText = document.getElementById('payload').value;
+            const detected = detectPriority(payloadText);
 
-            const priLabels = { 1: 'P1-CRITICAL', 2: 'P2-URGENT', 3: 'P3-STANDARD', 4: 'P4-LOW' };
-            const distance = haversine(17.3850, 78.4867, lat, lng);
-            const financial = calculateCost(distance, priority, payloadText);
-
-            const payload = {
+            const mission = {
                 request_id: `UAV-${mCount}`,
                 branch_name: document.getElementById('branch').value,
-                latitude: lat,
-                longitude: lng,
+                latitude: parseFloat(document.getElementById('lat').value),
+                longitude: parseFloat(document.getElementById('lng').value),
                 request_details: payloadText,
-                priority: priority,
-                priority_label: priLabels[priority],
+                priority: detected.priority,
+                priority_label: detected.label,
+                ai_priority_reason: detected.reason,
                 status: 'QUEUED',
-                distance_km: Math.round(distance * 100) / 100,
-                estimated_flight_time_min: Math.round((distance / 0.8) * 10) / 10,
-                financial: financial,
                 timestamp: new Date().toISOString(),
                 dispatched_from: 'WEB_GCS'
             };
@@ -999,17 +594,92 @@
             btn.disabled = true; spinner.classList.remove('hidden');
 
             try {
-                await push(missionsRef, payload);
-                window.showToast(`${priLabels[priority]} — UAV-${mCount} Dispatched | ₹${financial.total_cost.toLocaleString()}`, 'success');
+                await push(missionsRef, mission);
                 e.target.reset();
-                window.setPriority(3); // Reset to default
+                document.getElementById('priority-info').style.display = 'none';
+
+                // Show simple JS alert toast style (since we removed complex toasts)
+                alert(`SUCCESS! Dispached UAV-${mCount} as ${detected.label}`);
             } catch (err) {
-                window.showToast('Dispatch Failed', 'error');
+                alert(`Dispatch failed: ${err.message}`);
             } finally {
                 btn.disabled = false; spinner.classList.add('hidden');
             }
         });
 
+        // ═══ FIREBASE SYNC: QUEUE ═══
+        onValue(missionsRef, (snapshot) => {
+            const data = snapshot.val();
+            const dataArray = data ? Object.entries(data).map(([key, val]) => ({ key, ...val })) : [];
+            document.getElementById('mission-count').textContent = dataArray.length;
+
+            const tbody = document.getElementById('queue-body');
+            if (dataArray.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-500">No active missions in queue</td></tr>';
+            } else {
+                // Sort by priority -> lowest number first
+                dataArray.sort((a, b) => (a.priority || 3) - (b.priority || 3) || a.timestamp.localeCompare(b.timestamp));
+                tbody.innerHTML = dataArray.map(m => {
+                    const priClass = `pri-${m.priority || 3}`;
+                    let sCol = m.status === 'QUEUED' ? 'text-yellow-400' : 'text-emerald-400';
+                    return `
+                    <tr class="border-b border-slate-800/50 hover:bg-white/5 transition-colors">
+                        <td class="py-3 px-3"><span class="pri-badge ${priClass} px-2 py-1 text-[10px] rounded border">${m.priority_label || 'P3'}</span></td>
+                        <td class="py-3 px-3 font-mono text-cyan-300 text-xs">${m.request_id || m.key}</td>
+                        <td class="py-3 px-3 text-xs">${m.branch_name}</td>
+                        <td class="py-3 px-3 text-xs truncate max-w-xs">${m.request_details}</td>
+                        <td class="py-3 px-3 font-bold text-xs ${sCol}">${m.status || 'QUEUED'}</td>
+                    </tr>`;
+                }).join('');
+            }
+
+            // Update Target Markers
+            Object.values(mapMarkers).forEach(m => map.removeLayer(m));
+            mapMarkers = {};
+            dataArray.forEach(m => {
+                if (m.latitude && m.longitude && m.status !== 'COMPLETED') {
+                    const color = ['#ef4444', '#fb923c', '#22c55e', '#3b82f6'][(m.priority || 3) - 1];
+                    const icon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background:${color}; width:12px; height:12px; border:2px solid white; border-radius:50%; box-shadow:0 0 10px ${color};"></div>`,
+                        iconAnchor: [6, 6]
+                    });
+                    const marker = L.marker([m.latitude, m.longitude], { icon }).addTo(map)
+                        .bindPopup(`<div class="custom-popup px-3 py-2"><b style="color:${color}">${m.request_id}</b><br><span style="font-size:10px">${m.request_details}</span></div>`);
+                    mapMarkers[m.key] = marker;
+                }
+            });
+        });
+
+        // ═══ FIREBASE SYNC: TELEMETRY & LIVE DRONE TRACKING ═══
+        onValue(statusRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById('telem-mode').textContent = data.mode || '—';
+                document.getElementById('telem-battery').textContent = `${parseFloat(data.battery_pct).toFixed(1)}%`;
+                document.getElementById('telem-altitude').textContent = `${parseFloat(data.altitude_m).toFixed(1)} m`;
+                document.getElementById('telem-gps').textContent = data.gps_satellites || '—';
+                document.getElementById('telem-speed').textContent = `${parseFloat(data.ground_speed_ms).toFixed(1)} m/s`;
+                document.getElementById('telem-pos').textContent = `${parseFloat(data.lat).toFixed(6)}, ${parseFloat(data.lng).toFixed(6)}`;
+            }
+        });
+
+        onValue(trackRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.lat) {
+                if (!droneMarker) {
+                    droneMarker = L.marker([data.lat, data.lng], { icon: droneIcon }).addTo(map);
+                } else {
+                    droneMarker.setLatLng([data.lat, data.lng]);
+                }
+                const popupStr = `<b>DRONE ACTIVE</b><br>Mode: ${data.status}<br>Mission: ${data.mission_id}`;
+                if (!droneMarker.getPopup()) {
+                    droneMarker.bindPopup(`<div class="custom-popup px-2 py-1">${popupStr}</div>`);
+                } else {
+                    droneMarker.setPopupContent(`<div class="custom-popup px-2 py-1">${popupStr}</div>`);
+                }
+            }
+        });
     </script>
 </body>
 

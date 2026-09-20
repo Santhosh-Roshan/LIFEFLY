@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(python *)",
-      "Bash(awk '{print $9, \"\\(\"$5\"\\)\"}')"
+      "Bash(awk '{print $9, \"\\(\"$5\"\\)\"}')",
+      "Bash(cd /d C:\\\\Users\\\\DELL\\\\Desktop\\\\lifefly)",
+      "Bash(start index_enhanced.html)",
+      "Bash(start *)"
     ]
   }
 }

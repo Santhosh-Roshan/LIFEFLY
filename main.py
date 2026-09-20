@@ -1,16 +1,39 @@
+#!/usr/bin/env python3
+"""
+╔══════════════════════════════════════════════════════════════════════╗
+║  LIFEFLY GCS — FIREBASE CLOUD LISTENER                              ║
+║  Priority-Based UAV Medical Delivery Network                         ║
+║  Monitors Firebase for incoming dispatches with AI priority          ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+This script listens to Firebase RTDB for new mission dispatches and
+displays them in the terminal with AI-detected priority levels.
+Run this alongside run_simulation.py for the full system.
+"""
+
 import time
 import requests
 import logging
 
+from priority_detector import detect_priority, get_priority_description
+
 # Suppress noisy logs
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
-# The global Firebase URL for LifeFly
 FIREBASE_URL = "https://lifefly-default-rtdb.firebaseio.com/missions.json"
 
+RESET  = "\033[0m"
+CYAN   = "\033[1;96m"
+GREEN  = "\033[1;92m"
+RED    = "\033[1;91m"
+YELLOW = "\033[1;93m"
+WHITE  = "\033[1;97m"
+DIM    = "\033[2m"
+
 print("\n" + "═" * 70)
-print("\033[1;36m[+] LIFEFLY GCS TACTICAL SERVER ONLINE\033[0m")
-print("\033[1;32m[+] Connected to Global Firebase IoT Cloud (Data Link Active)\033[0m")
+print(f"{CYAN}[+] LIFEFLY GCS TACTICAL SERVER ONLINE{RESET}")
+print(f"{GREEN}[+] Connected to Global Firebase IoT Cloud (Data Link Active){RESET}")
+print(f"{GREEN}[+] AI Priority Detection Engine Loaded{RESET}")
 print("[+] Listening for incoming drone dispatches from the web array...\n")
 print("═" * 70 + "\n")
 
@@ -18,8 +41,8 @@ processed_ids = set()
 
 def listen_to_firebase():
     global processed_ids
-    
-    # Pre-fetch existing missions so we don't spam the terminal with old history
+
+    # Pre-fetch existing missions
     try:
         response = requests.get(FIREBASE_URL)
         if response.status_code == 200 and response.json():
@@ -38,28 +61,38 @@ def listen_to_firebase():
                     for key, mission in data.items():
                         if key not in processed_ids:
                             processed_ids.add(key)
-                            
+
                             req_id = mission.get('request_id', key)
-                            
-                            # Beautiful Terminal UI
+                            payload = mission.get('request_details', '')
+
+                            # AI Priority Detection
+                            pri_result = detect_priority(payload)
+                            pri_label = mission.get('priority_label', pri_result['label'])
+                            ai_reason = mission.get('ai_priority_reason', pri_result['reason'])
+
+                            pri_colors = {1: RED, 2: YELLOW, 3: GREEN, 4: CYAN}
+                            pri_num = mission.get('priority', pri_result['priority'])
+                            color = pri_colors.get(pri_num, GREEN)
+
                             print("═" * 65)
-                            print(f" 🚀 NEW UAV MISSION AUTHORIZED: \033[96m{req_id}\033[0m")
+                            print(f" 🚀 NEW UAV MISSION: {CYAN}{req_id}{RESET}")
+                            print(f" {color}⚡ {pri_label}{RESET}")
                             print("═" * 65)
-                            print(f" 📍 Branch:      \033[93m{mission.get('branch_name')}\033[0m")
-                            print(f" 🌐 Coordinates: [\033[92m{mission.get('latitude', 0.0):.6f}, {mission.get('longitude', 0.0):.6f}\033[0m]")
-                            print(f" 📦 Payload:     \033[97m{mission.get('request_details')}\033[0m")
-                            print(f" 🕒 Timestamp:   \033[90m{mission.get('timestamp')}\033[0m")
-                            print(f" 🚦 Status:      \033[1;33m{mission.get('status')}\033[0m")
+                            print(f" 📍 Branch:      {YELLOW}{mission.get('branch_name')}{RESET}")
+                            print(f" 🌐 Coordinates: [{GREEN}{mission.get('latitude', 0.0):.6f}, {mission.get('longitude', 0.0):.6f}{RESET}]")
+                            print(f" 📦 Payload:     {WHITE}{payload}{RESET}")
+                            print(f" 🤖 AI Reason:   {DIM}{ai_reason}{RESET}")
+                            print(f" 🕒 Timestamp:   {DIM}{mission.get('timestamp')}{RESET}")
+                            print(f" 🚦 Status:      {YELLOW}{mission.get('status')}{RESET}")
                             print("═" * 65 + "\n")
-                            
+
         except Exception as e:
-            print(f"\033[91m[!] Firebase connection drift: {e}\033[0m")
-            
-        # Poll every 2 seconds efficiently
+            print(f"{RED}[!] Firebase connection drift: {e}{RESET}")
+
         time.sleep(2)
 
 if __name__ == "__main__":
     try:
         listen_to_firebase()
     except KeyboardInterrupt:
-        print("\n\033[91m[+] System Offline. Comm link severed.\033[0m")
+        print(f"\n{RED}[+] System Offline. Comm link severed.{RESET}")

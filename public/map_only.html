@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAVLink Tactical Satellite Viewer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: monospace;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .overlay-hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            color: lime;
+            padding: 10px;
+            border: 1px solid lime;
+            text-transform: uppercase;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .ping {
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="overlay-hud">
+        <b>[+] MAVLink Direct Sat-Feed</b><br>
+        STATUS: <span id="status" class="ping">STANDBY</span><br>
+        ALT: <span id="alt">0</span>m<br>
+        SPD: <span id="speed">0</span>m/s
+    </div>
+    <div id="map"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+        const app = initializeApp({
+            apiKey: "AIzaSyCgHXLUhpMhw0X2XMfoh6WYGey0Y1bFmWI",
+            databaseURL: "https://lifefly-default-rtdb.firebaseio.com",
+            projectId: "lifefly",
+        });
+        const db = getDatabase(app);
+
+        const map = L.map('map', { zoomControl: false }).setView([17.3850, 78.4867], 14);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }).addTo(map);
+
+        let uavMarker = null;
+        let flightPath = L.polyline([], { color: '#00ffff', weight: 3 }).addTo(map);
+
+        onValue(ref(db, 'drone_track'), (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.lat) {
+                const ll = [data.lat, data.lng];
+                if (!uavMarker) {
+                    uavMarker = L.marker(ll, {
+                        icon: L.divIcon({ html: `<div style="background:lime; width:15px; height:15px; border-radius:50%; border:2px solid black;" class="ping"></div>`, className: '' })
+                    }).addTo(map);
+                } else {
+                    uavMarker.setLatLng(ll);
+                }
+
+                if (data.status === 'IDLE') {
+                    flightPath.setLatLngs([]);
+                } else {
+                    flightPath.addLatLng(ll);
+                }
+
+                document.getElementById('status').textContent = data.status;
+                document.getElementById('alt').textContent = data.alt;
+                map.panTo(ll);
+            }
+        });
+
+        onValue(ref(db, 'uav_status'), (snapshot) => {
+            const data = snapshot.val();
+            if (data) document.getElementById('speed').textContent = data.ground_speed_ms;
+        });
+
+        // Plot Base
+        L.marker([17.3850, 78.4867], {
+            icon: L.divIcon({ html: `<div style="background:fuchsia; width:20px; height:20px; border:3px solid white; transform: rotate(45deg);"></div>`, className: '' })
+        }).addTo(map);
+    </script>
+</body>
+
+</html>
