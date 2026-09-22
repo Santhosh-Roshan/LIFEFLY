@@ -314,7 +314,7 @@ def dispatch_mission(branch_name, lat, lng, payload_details, priority=None):
     request_id = f"UAV-{mission_counter:04d}"
     
     # Base station coordinates (main hospital hub)
-    base_lat, base_lng = 17.3850, 78.4867
+    base_lat, base_lng = 17.397210, 78.489888
     distance = calculate_distance_km(base_lat, base_lng, lat, lng)
     
     # Financial calculation
@@ -451,7 +451,7 @@ def firebase_listener_thread():
                             update_mission_status(key, "TRANSMITTED")
                             
                         # Log financial data
-                        base_lat, base_lng = 17.3850, 78.4867
+                        base_lat, base_lng = 17.397210, 78.489888
                         dist = calculate_distance_km(
                             base_lat, base_lng,
                             float(mission.get("latitude", base_lat)),

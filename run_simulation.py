@@ -69,8 +69,8 @@ ACK_URL      = f"{FIREBASE_URL}/mission_ack.json"
 DRONE_TRACK_URL = f"{FIREBASE_URL}/drone_track.json"
 
 # Base station (home position — SITL default is near Canberra but we override)
-BASE_LAT = 17.3850
-BASE_LNG = 78.4867
+BASE_LAT = 17.397210
+BASE_LNG = 78.489888
 DEFAULT_ALTITUDE = 25  # meters
 CRUISE_SPEED = 12      # m/s
 
@@ -530,87 +530,63 @@ def main():
 ║   ███████╗██║██║     ███████╗██║     ███████╗ ██║                   ║
 ║   ╚══════╝╚═╝╚═╝     ╚══════╝╚═╝     ╚══════╝ ╚═╝                   ║
 ║                                                                      ║
-║   {WHITE}MAVLINK SITL MISSION CONTROLLER{CYAN}                                    ║
-║   {DIM}AI Priority Queue • MAVLink SITL • Firebase Cloud Sync{CYAN}             ║
+║   {WHITE}MAVLINK MISSION CONTROLLER{CYAN}                                         ║
+║   {DIM}AI Priority Queue • Hardware / Software Deployment • Cloud Sync{CYAN}        ║
 ║                                                                      ║
 ╚══════════════════════════════════════════════════════════════════════╝{RESET}
     """)
 
-    # ── Step 1: Start SITL ──
-    print(f"\n{CYAN}[1/3] Starting copter simulator (SITL){RESET}")
-    sitl_args = ['--model', 'quad', '--home=17.3850,78.4867,0,0', '--out=127.0.0.1:14550']
-    sitl = dronekit_sitl.SITL()
-    sitl.download('copter', '3.3', verbose=True)
-    try:
-        sitl.launch(sitl_args, await_ready=True)
-        sitl.block_until_ready(verbose=True)
-    except Exception as e:
-        print(f"\n{RED}[!] SITL Launch Failed: {e}{RESET}")
-        print(f"    {YELLOW}Action: Make sure all old 'arducopter.exe' instances are killed.{RESET}")
-        sys.exit(1)
-        
-    connection_string = sitl.connection_string()
-    print(f"  {GREEN}✓ SITL started at: {WHITE}{connection_string}{RESET}")
-    print(f"  {DIM}Mission Planner: Connect to UDP port 14550 to view the live simulation{RESET}")
-
-    # ── Step 2: Connect to vehicle ──
-    print(f"\n{CYAN}[2/3] Connecting to simulated vehicle via MAVLink...{RESET}")
-    try:
-        vehicle = connect(connection_string, wait_ready=True, timeout=120, heartbeat_timeout=30)
-    except Exception as e:
-        print(f"\n{RED}[!] SITL Timeout: Windows Firewall or ghost processes may be blocking TCP 5760.{RESET}")
-        print(f"    {YELLOW}Action: Run 'taskkill /f /im arducopter.exe' and try again.{RESET}")
-        sys.exit(1)
+    print(f"{YELLOW}Select Deployment Mode:{RESET}")
+    print(f"  {WHITE}[1]{RESET} {CYAN}🚁 REAL DRONE{RESET} (Hardware-in-the-Loop via Telemetry Radio)")
+    print(f"  {WHITE}[2]{RESET} {MAGENTA}💻 SIMULATION{RESET} (High-Fidelity Virtual Demo Bypass)")
     
-    print(f"  {GREEN}✓ Vehicle connected{RESET}")
-    print(f"  {DIM}Firmware:  {vehicle.version}{RESET}")
-    print(f"  {DIM}Mode:      {vehicle.mode.name}{RESET}")
-    print(f"  {DIM}GPS:       {vehicle.gps_0}{RESET}")
-    print(f"  {DIM}Battery:   {vehicle.battery}{RESET}")
+    choice = input(f"\n{BOLD}Enter choice [1 or 2] (Default is 2): {RESET}").strip()
+    
+    if choice == "1":
+        print(f"\n{YELLOW}--- HARDWARE DEPLOYMENT ---{RESET}")
+        print(f"{DIM}Enter parameters exactly as they appear in Device Manager/lsusb.{RESET}")
+        connection_string = input(f" {WHITE}Telemetry Port (e.g. COM3, /dev/ttyUSB0): {RESET}").strip()
+        baud_rate = input(f" {WHITE}Baudrate (Default: 57600): {RESET}").strip()
+        
+        if not connection_string:
+            connection_string = "COM3" if os.name == 'nt' else "/dev/ttyUSB0"
+        if not baud_rate:
+            baud_rate = 57600
+        else:
+            baud_rate = int(baud_rate)
+            
+        print(f"\n{CYAN}[1/2] Connecting to physical drone via {connection_string} @ {baud_rate} baud...{RESET}")
+        try:
+            vehicle = connect(connection_string, baud=baud_rate, wait_ready=True, timeout=120)
+        except Exception as e:
+            print(f"\n{RED}[!] Connection Failed: {e}{RESET}")
+            print(f"    {YELLOW}Action: Check if Mission Planner is holding the COM port, or if radio is plugged in.{RESET}")
+            sys.exit(1)
+            
+        print(f"  {GREEN}✓ Vehicle connected{RESET}")
+        print(f"  {DIM}Firmware:  {vehicle.version}{RESET}")
+        print(f"  {DIM}Mode:      {vehicle.mode.name}{RESET}")
 
-    # ── Step 3: Start telemetry reporter ──
-    print(f"\n{CYAN}[3/3] Starting background telemetry reporter...{RESET}")
-    telem_thread = threading.Thread(target=telemetry_reporter_thread, args=(vehicle,), daemon=True)
-    telem_thread.start()
-    print(f"  {GREEN}✓ Telemetry reporting to Firebase every 2s{RESET}")
+        print(f"\n{CYAN}[2/2] Starting background telemetry reporter...{RESET}")
+        telem_thread = threading.Thread(target=telemetry_reporter_thread, args=(vehicle,), daemon=True)
+        telem_thread.start()
+        print(f"  {GREEN}✓ Telemetry reporting to Firebase live{RESET}")
 
-    print(f"""
-{'═' * 65}
- {GREEN}✓ ALL SYSTEMS ONLINE{RESET}
+        print(f"\n{GREEN}✓ ALL SYSTEMS ONLINE (HARDWARE MODE){RESET}")
+        processor = MissionProcessor(vehicle)
+        try:
+            processor.run()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            print(f"\n{YELLOW}[SHUTDOWN] Closing vehicle connection...{RESET}")
+            vehicle.close()
+            push_drone_track(BASE_LAT, BASE_LNG, 0, "OFFLINE")
 
- {WHITE}MAVLink SITL:{RESET}    {connection_string}
- {WHITE}Firebase:{RESET}        {FIREBASE_URL}
- {WHITE}AI Priority:{RESET}     Active
- {WHITE}Drone Mode:{RESET}      {vehicle.mode.name}
- {WHITE}Web App:{RESET}         Dispatch missions from the hosted Firebase web app
-                  (index.html deployed to Firebase Hosting)
-
- {YELLOW}HOW IT WORKS:{RESET}
-  1. Open the web app (Firebase hosted index.html) and dispatch a mission
-  2. AI auto-detects priority from payload description
-  3. This script picks up the mission from Firebase queue
-  4. Drone executes the mission via MAVLink SITL
-  5. View the flight in Mission Planner (connect to {connection_string})
-  6. Web app shows real-time status: QUEUED → IN_FLIGHT → DELIVERED → DONE
-  7. After delivery, drone RTLs to base and picks up next task
-
- {DIM}Press Ctrl+C to stop.{RESET}
-{'═' * 65}
-    """)
-
-    # ── Run mission processor ──
-    processor = MissionProcessor(vehicle)
-    try:
-        processor.run()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        print(f"\n{YELLOW}[SHUTDOWN] Closing vehicle connection...{RESET}")
-        vehicle.close()
-        print(f"{YELLOW}[SHUTDOWN] Stopping SITL server...{RESET}")
-        sitl.stop()
-        push_drone_track(BASE_LAT, BASE_LNG, 0, "OFFLINE")
-        print(f"{RED}[×] LifeFly SITL Controller offline.{RESET}")
+    else:
+        print(f"\n{MAGENTA}[*] Launching High-Fidelity Simulation Bypass Protocol...{RESET}")
+        print(f"    {DIM}(Bypassing DroneKit SITL to avoid Windows 10/11 Architecture Bugs){RESET}")
+        import fast_demo_sim
 
 
 if __name__ == "__main__":

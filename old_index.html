@@ -595,13 +595,13 @@
                             <div>
                                 <label
                                     class="block text-xs text-slate-400 mb-1 uppercase font-semibold">Latitude</label>
-                                <input type="number" step="any" id="lat" required placeholder="17.3850"
+                                <input type="number" step="any" id="lat" required placeholder="17.397210"
                                     class="input-glass w-full rounded-lg p-2.5 text-xs font-mono font-bold text-white">
                             </div>
                             <div>
                                 <label
                                     class="block text-xs text-slate-400 mb-1 uppercase font-semibold">Longitude</label>
-                                <input type="number" step="any" id="lng" required placeholder="78.4867"
+                                <input type="number" step="any" id="lng" required placeholder="78.489888"
                                     class="input-glass w-full rounded-lg p-2.5 text-xs font-mono font-bold text-white">
                             </div>
                         </div>
@@ -761,7 +761,7 @@
             const trackRef = ref(db, 'drone_track');
 
             // MAP SETUP
-            const map = L.map('map', { zoomControl: false }).setView([17.3850, 78.4867], 12);
+            const map = L.map('map', { zoomControl: false }).setView([17.397210, 78.489888], 12);
             L.control.zoom({ position: 'topright' }).addTo(map);
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Esri', maxZoom: 18
@@ -781,7 +781,7 @@
                    </div>`,
                 iconSize: [40, 40], iconAnchor: [20, 20]
             });
-            L.marker([17.3850, 78.4867], { icon: baseIcon }).addTo(map).bindPopup("<b>GCS Base Station</b>");
+            L.marker([17.397210, 78.489888], { icon: baseIcon }).addTo(map).bindPopup("<b>GCS Base Station</b>");
 
             const droneIcon = L.divIcon({
                 className: 'custom-div-icon',

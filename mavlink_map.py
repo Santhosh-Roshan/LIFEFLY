@@ -8,8 +8,8 @@ TRACK_URL = f"{FIREBASE_URL}/drone_track.json"
 MISSIONS_URL = f"{FIREBASE_URL}/missions.json"
 
 # Base station
-BASE_LAT = 17.3850
-BASE_LNG = 78.4867
+BASE_LAT = 17.397210
+BASE_LNG = 78.489888
 
 # Setup Plot
 plt.style.use('dark_background')

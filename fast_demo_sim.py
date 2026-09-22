@@ -9,8 +9,8 @@ print("[+] Bypassing SITL and initializing direct PyMAVLink link to Mission Plan
 API_KEY = "AIzaSyCgHXLUhpMhw0X2XMfoh6WYGey0Y1bFmWI"
 FIREBASE_URL = "https://lifefly-default-rtdb.firebaseio.com"
 
-BASE_LAT = 17.3850
-BASE_LNG = 78.4867
+BASE_LAT = 17.397210
+BASE_LNG = 78.489888
 SPEED = 0.0003  # Roughly 20m/s in lat/lng degrees
 
 print("[+] Authenticating with Firebase Anonymous Auth...")

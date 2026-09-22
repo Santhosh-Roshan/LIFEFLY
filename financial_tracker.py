@@ -508,7 +508,7 @@ def process_existing_missions():
             return
         
         missions = response.json()
-        base_lat, base_lng = 17.3850, 78.4867
+        base_lat, base_lng = 17.397210, 78.489888
         
         print(f"\n{CYAN}Processing {len(missions)} missions...{RESET}\n")
         
@@ -618,7 +618,7 @@ def main():
                 "longitude": 78.4343,
                 "request_details": "Blood Pack O-Negative Emergency"
             }
-            dist = haversine_km(17.3850, 78.4867, 17.4122, 78.4343)
+            dist = haversine_km(17.397210, 78.489888, 17.4122, 78.4343)
             cost = engine.calculate_mission_cost(dist, 1, sample_mission["request_details"])
             invoice = engine.generate_invoice(sample_mission, cost)
             print(invoice)

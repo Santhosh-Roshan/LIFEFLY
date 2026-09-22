@@ -100,8 +100,8 @@ class UAVController:
         self.mode = "STABILIZE"
         self.battery = 100.0
         self.gps_sats = 0
-        self.lat = 17.3850
-        self.lng = 78.4867
+        self.lat = 17.397210
+        self.lng = 78.489888
         self.ground_speed = 0.0
         self.connected = False
         
@@ -260,8 +260,8 @@ class UAVController:
             self.mode = "RTL"
             self.ground_speed = CRUISE_SPEED
             time.sleep(2)
-            self.lat = 17.3850
-            self.lng = 78.4867
+            self.lat = 17.397210
+            self.lng = 78.489888
             self.altitude = 0.0
             self.armed = False
             self.ground_speed = 0.0
@@ -428,8 +428,8 @@ def execute_mission(uav, queue_mgr, mission):
     """Execute a single mission: arm → takeoff → navigate → land → RTL."""
     mission_id = mission.get("request_id", "UNKNOWN")
     fb_key = mission.get("_firebase_key", "")
-    target_lat = float(mission.get("latitude", 17.3850))
-    target_lng = float(mission.get("longitude", 78.4867))
+    target_lat = float(mission.get("latitude", 17.397210))
+    target_lng = float(mission.get("longitude", 78.489888))
     priority = mission.get("priority", 3)
     
     print(f"\n{'▓' * 65}")

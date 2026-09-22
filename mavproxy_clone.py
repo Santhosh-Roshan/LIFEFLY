@@ -59,7 +59,7 @@ class MAVProxyMap(tk.Tk):
         if self.base_marker is None:
             self.map_widget.set_position(lat, lng)
             self.map_widget.set_zoom(15)
-            self.base_marker = self.map_widget.set_marker(17.3850, 78.4867, text="Base")
+            self.base_marker = self.map_widget.set_marker(17.397210, 78.489888, text="Base")
             
         if self.drone_marker is None:
             self.drone_marker = self.map_widget.set_marker(lat, lng, text="UAV")
